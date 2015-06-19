@@ -94,6 +94,7 @@ void URGCWrapper::initialize(bool& using_intensity, bool& using_multiecho){
   last_step_ = 0;
   cluster_ = 1;
   skip_ = 0;
+  range_max_ = 0.0;
 
   if(using_intensity){
   	using_intensity = isIntensitySupported();
@@ -154,7 +155,7 @@ bool URGCWrapper::grabScan(const sensor_msgs::LaserScanPtr& msg){
   msg->time_increment = getTimeIncrement();
   msg->range_min = getRangeMin();
   msg->range_max = getRangeMax();
-  
+
   // Grab scan
   int num_beams = 0;
   long time_stamp = 0;
@@ -176,7 +177,7 @@ bool URGCWrapper::grabScan(const sensor_msgs::LaserScanPtr& msg){
   if(use_intensity_){
   	msg->intensities.resize(num_beams);
   }
-  
+
   for (int i = 0; i < num_beams; i++) {
     if(data_[(i) + 0] != 0){
       msg->ranges[i] = (float)data_[i]/1000.0;
@@ -186,7 +187,7 @@ bool URGCWrapper::grabScan(const sensor_msgs::LaserScanPtr& msg){
     } else {
       msg->ranges[i] = std::numeric_limits<float>::quiet_NaN();
       continue;
-    }  
+    }
   }
   return true;
 }
@@ -200,7 +201,7 @@ bool URGCWrapper::grabScan(const sensor_msgs::MultiEchoLaserScanPtr& msg){
   msg->time_increment = getTimeIncrement();
   msg->range_min = getRangeMin();
   msg->range_max = getRangeMax();
-  
+
   // Grab scan
   int num_beams = 0;
   long time_stamp = 0;
@@ -263,8 +264,16 @@ double URGCWrapper::getRangeMin() const{
 double URGCWrapper::getRangeMax() const{
   long minr;
   long maxr;
-  urg_distance_min_max(&urg_, &minr, &maxr);
-  return (double)maxr/1000.0;
+
+  if (range_max_ == 0)
+  {
+    urg_distance_min_max(&urg_, &minr, &maxr);
+    return (double)maxr/1000.0;
+  }
+  else
+  {
+    return range_max_;
+  }
 }
 
 double URGCWrapper::getAngleMin() const{
@@ -412,6 +421,11 @@ bool URGCWrapper::setAngleLimitsAndCluster(double& angle_min, double& angle_max,
     return false;
   }
   return true;
+}
+
+bool URGCWrapper::setRangeMax(double range_max)
+{
+        range_max_ = range_max;
 }
 
 bool URGCWrapper::setSkip(int skip){

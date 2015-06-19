@@ -115,6 +115,8 @@ namespace urg_node
 
     bool setSkip(int skip);
 
+    bool setRangeMax(double range_max);
+
     ros::Duration computeLatency(size_t num_measurements);
 
     bool grabScan(const sensor_msgs::LaserScanPtr& msg);
@@ -149,6 +151,7 @@ namespace urg_node
     int last_step_;
     int cluster_;
     int skip_;
+    double range_max_;
 
     ros::Duration system_latency_;
     ros::Duration user_latency_;
@@ -158,8 +161,7 @@ namespace urg_node
     std::string serial_port_;
     int serial_baud_;
   };
-  
-  
+
 }; // urg_node
 
 #endif

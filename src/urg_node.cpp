@@ -75,6 +75,7 @@ double freq_min, freq_max;
 bool reconfigure_callback(urg_node::URGConfig& config, int level){
   if(level < 0){ // First call, initialize, laser not yet started
     urg_->setAngleLimitsAndCluster(config.angle_min, config.angle_max, config.cluster);
+    urg_->setRangeMax(config.range_max);
     urg_->setSkip(config.skip);
   } else if(level > 0){ // Must stop
     urg_->stop();
@@ -82,6 +83,7 @@ bool reconfigure_callback(urg_node::URGConfig& config, int level){
 
     // Change values that required stopping
     urg_->setAngleLimitsAndCluster(config.angle_min, config.angle_max, config.cluster);
+    urg_->setRangeMax(config.range_max);
     urg_->setSkip(config.skip);
 
     try{
@@ -117,7 +119,7 @@ void update_reconfigure_limits(){
   min.angle_max = min.angle_min;
   max.angle_max = urg_->getAngleMaxLimit();
   max.angle_min = max.angle_max;
-  
+
   srv_->setConfigMin(min);
   srv_->setConfigMax(max);
 }
@@ -160,7 +162,7 @@ void populateDiagnosticsStatus(diagnostic_updater::DiagnosticStatusWrapper &stat
     if(!urg_->isStarted())
     {
       stat.summary(2, "Not Connected: " + device_status_);
-    } 
+    }
     else if(device_status_ != std::string("Sensor works well.") && device_status_ != std::string("Stable 000 no error."))
     {
       stat.summary(2, "Abnormal status: " + device_status_);
